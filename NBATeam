@@ -1,0 +1,40 @@
+public class NBATeam extends SportsClub{
+    private int winCount;
+    private int lossCount;
+    private int pointsScored;
+    private int pointsReceived;
+    private int matchesPlayed;
+
+    public int getWinCount(){
+        return winCount;
+    }
+    public int getLossCount(){
+        return lossCount;
+    }
+    public int getPointsScored(){
+        return pointsScored;
+    }
+    public int getPointsReceived(){
+        return pointsReceived;
+    }
+    public int getMatchesPlayed(){
+        return matchesPlayed;
+    }
+
+    public void setWinCount(int i) {
+        winCount = i;
+    }
+    public void setLossCount(int i) {
+        lossCount = i;
+    }
+    public void setPointsScored(int i){
+        pointsScored=i;
+    }
+    public void setPointsReceived(int i){
+        pointsReceived=i;
+    }
+    public void setMatchesPlayed(int i){
+        matchesPlayed=i;
+    }
+
+}
