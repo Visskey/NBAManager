@@ -1,0 +1,23 @@
+import java.util.*;
+
+public class CustomComparator implements Comparator<NBATeam>{
+    @Override
+    public int compare(NBATeam t, NBATeam t1){
+        if(t.getWinCount()>t1.getWinCount())
+            return -1;
+        else
+            if (t.getWinCount()<t1.getWinCount())
+                return 1;
+            else{
+                int pointsDifferential1=t.getPointsScored()-t.getPointsReceived();
+                int pointsDifferential2=t1.getPointsScored()-t1.getPointsReceived();
+                if (pointsDifferential1>pointsDifferential2)
+                    return -1;
+                else
+                    if(pointsDifferential1<pointsDifferential2)
+                        return 1;
+                    else
+                        return 0;
+            }
+    }
+}
