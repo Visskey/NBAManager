@@ -1,0 +1,292 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class LeagueManager {
+    private final int numberofTeams;
+
+    private final ArrayList<NBATeam> league;
+    private final Scanner scanner;
+    private final ArrayList<Match> matches;
+
+    public LeagueManager(int numberofTeams) {
+        this.numberofTeams = numberofTeams;
+        league = new ArrayList<>();
+        matches = new ArrayList<>();
+        scanner = new Scanner(System.in);
+        displayMenu();
+    }
+
+    private void displayMenu() {
+        while (true) {
+            System.out.println("------------------------------------------------");
+            System.out.println("NBA League Menu:");
+            System.out.println("Add a team to the league (Press 1):");
+            System.out.println("Remove a team from the league (Press 2):");
+            System.out.println("Show statistics for a team (Press 3):");
+            System.out.println("Show the NBA Table(Press 4):");
+            System.out.println("Insert a played match(Press 5):");
+            System.out.println("Show Calendar and find match(Press 6):");
+            System.out.println("------------------------------------------------");
+            String line = scanner.nextLine();
+
+            int command = 0;
+            try {
+                command = Integer.parseInt(line);
+            } catch (Exception e) {
+            }
+
+            switch (command) {
+                case 1:
+                    addTeam();
+                    break;
+                case 2:
+                    deleteTeam();
+                    break;
+                case 3:
+                    displayStatistics();
+                    break;
+                case 4:
+                    displayNBAtable();
+                    break;
+                case 5:
+                    addPlayedGame();
+                    break;
+                case 6:
+                    displayCalendar();
+                    break;
+                default:
+                    System.out.println("Wrong");
+            }
+        }
+    }
+
+    private void addTeam() {
+        if (league.size() == numberofTeams) {
+            System.out.println("Can't add more teams");
+            return;
+        }
+
+        NBATeam team = new NBATeam();
+        System.out.println("Insert Team Name:");
+        String line = scanner.nextLine();
+        team.setName(line);
+
+        if (league.contains(team)) {
+            System.out.println("This team is already in the NBA");
+            return;
+        }
+        System.out.println("Insert Team Location:");
+        line = scanner.nextLine();
+        team.setLocation(line);
+        league.add(team);
+        System.out.println("The team:" + line + " has been added");
+    }
+
+
+    private void deleteTeam() {
+        System.out.println("Insert team name:");
+        String line = scanner.nextLine();
+        for (NBATeam team : league) {
+            if (team.getName().equals(line)) {
+                league.remove(team);
+                System.out.println("Team: " + team.getName() + " has been removed");
+                return;
+            }
+        }
+        System.out.println("That team is not in the NBA!");
+    }
+
+    private void displayStatistics() {
+        System.out.print("Insert team name: ");
+        String line = scanner.nextLine();
+        for (NBATeam team : league) {
+            if (team.getName().equals(line)) {
+                System.out.println("Team " + team.getName() + " games played:" + (team.getWinCount()+team.getLossCount()));
+                System.out.println("Team " + team.getName() + " games won:" + team.getWinCount());
+                System.out.println("Team " + team.getName() + " games lost:" + team.getLossCount());
+                System.out.println("Team " + team.getName() + " points scored:" + team.getPointsScored());
+                System.out.println("Team " + team.getName() + " points received:" + team.getPointsReceived());
+                System.out.println("-------------------------------------------------------------------------\n");
+            }
+        }
+        System.out.println("That team is not in the NBA!");
+    }
+
+    private void displayNBAtable() {
+        Collections.sort(league, new CustomComparator());
+        for (NBATeam team : league) {
+            System.out.println(team.getName() + " Matches Played:" + (team.getWinCount()+team.getLossCount()) + " Wins:" + team.getWinCount()
+                    + " Losses:" + team.getLossCount() + " Point Differential:" + (team.getPointsScored() - team.getPointsReceived()));
+        }
+    }
+
+    private void addPlayedGame() {
+        System.out.println("Enter date of the game (mm-dd-yyyy): ");
+        String line = scanner.nextLine();
+        Date date;
+        try {
+            date = new SimpleDateFormat("MM-dd-yyyy").parse(line);
+        } catch (ParseException ex) {
+            System.out.println("The date format should be mm-dd-yyyy");
+            return;
+        }
+        System.out.println("Enter Home Team: ");
+        line = scanner.nextLine();
+        NBATeam home = null;
+        for (NBATeam team : league) {
+            if (team.getName().equals(line)) {
+                home = team;
+            }
+        }
+
+        if (home == null) {
+            System.out.println("That team is not in the NBA!");
+        }
+
+        System.out.println("Enter Away Team: ");
+        line = scanner.nextLine();
+        NBATeam away = null;
+        for (NBATeam team : league) {
+            if (team.getName().equals(line)) {
+                away = team;
+            }
+        }
+
+        System.out.println("Enter home points scored: ");
+        line = scanner.nextLine();
+        int homePoints = -1;
+        try {
+            homePoints = Integer.parseInt(line);
+        } catch (Exception e) {
+
+        }
+        if (homePoints == -1) {
+            System.out.println("You have to enter the number of points:");
+        }
+        System.out.println("Enter away points scored: ");
+        line = scanner.nextLine();
+        int awayPoints = -1;
+        try {
+            awayPoints = Integer.parseInt(line);
+        } catch (Exception e) {
+
+        }
+        if (awayPoints == -1) {
+            System.out.println("You have to enter the number of points:");
+        }
+
+        Match match = new Match();
+        match.setDate(date);
+        match.setTeamA(home);
+        match.setTeamB(away);
+        match.setTeamAScore(homePoints);
+        match.setTeamBScore(awayPoints);
+        matches.add(match);
+        home.setPointsScored(home.getPointsScored() + homePoints);
+        away.setPointsScored(away.getPointsScored() + awayPoints);
+        home.setPointsReceived(home.getPointsReceived() + awayPoints);
+        away.setPointsReceived(away.getPointsReceived() + homePoints);
+
+        if (homePoints > awayPoints) {
+            home.setWinCount(home.getWinCount() + 1);
+            away.setLossCount((away.getLossCount() + 1));
+        } else {
+            home.setLossCount(home.getLossCount() + 1);
+            away.setWinCount((away.getWinCount() + 1));
+        }
+    }
+
+    private void displayCalendar() {
+
+        System.out.println("Enter year: ");
+        String line = scanner.nextLine();
+        int Y = -7777;
+        try {
+            Y = Integer.parseInt(line);
+        } catch (Exception e) {
+        }
+        if (Y == -7777) {
+            System.out.println("You have to enter a year");
+            return;
+        }
+
+        System.out.println("Enter Month: ");
+        line = scanner.nextLine();
+        int M = 0;
+        try {
+            M = Integer.parseInt(line);
+        } catch (Exception e) {
+        }
+        if (M == 0) {
+            System.out.println("You have to enter a month");
+            return;
+        }
+
+        String[] months = {
+                "",
+                "January", "February", "March",
+                "April", "May", "June",
+                "July", "August", "September",
+                "October", "November", "December"
+        };
+
+        int[] days = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+        if (M == 2 && isLeapYear(Y)) days[M] = 29;
+
+        System.out.println("    " + months[M] + " " + Y);
+        System.out.println("S  M  Tu  W  Th  F  S");
+
+        int d = day(M, 1, Y);
+        String space = "";
+
+        for (int i = 0; i < d; i++)
+            System.out.print("   ");
+        for (int i = 1; i <= days[M]; i++) {
+            if (i < 10)
+                System.out.print(i + "  ");
+            else
+                System.out.print(i + " ");
+            if (((i + d) % 7 == 0) || (i == days[M])) System.out.println();
+        }
+
+        System.out.println("Enter day: ");
+        line = scanner.nextLine();
+        int D = 0;
+        try {
+            D = Integer.parseInt(line);
+        } catch (Exception e) {
+        }
+        if (D == 0 || days[M] < D) {
+            System.out.println("You have t enter day in month");
+            return;
+        }
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Y, M - 1, D);
+        for (Match m : matches) {
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(m.getDate());
+            System.out.println("Ndeshjet ne kete date:");
+            if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) || cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) {
+                System.out.println(m.getTeamA().getName()+" "+m.getTeamAScore()+":"+m.getTeamBScore()+" "+m.getTeamB().getName()+"\n");
+            }
+        }
+    }
+
+    public int day(int M, int D, int Y) {
+        int y = Y - (14 - M) / 12;
+        int x = y + y / 4 - y / 100 + y / 400;
+        int m = M + 12 * ((14 - M) / 12) - 2;
+        int d = (D + x + (31 * m) / 12) % 7;
+        return d;
+    }
+
+    public boolean isLeapYear(int year) {
+
+        if ((year % 4 == 0) && (year % 100 != 0)) return true;
+        if (year % 400 == 0) return true;
+        return false;
+    }
+}
